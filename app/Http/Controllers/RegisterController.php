@@ -1,0 +1,53 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\User;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
+
+class RegisterController extends Controller
+{
+    public function register(Request $request) 
+    {
+
+        $validated = $request->validate([
+            'email' => 'required|string|max:255',
+            'username' => 'required|string|max:255',
+            'password' => 'required|string|max:255',
+        ]);
+
+        $firstname = $request->firstname;
+        $lastname = $request->lastname;
+        $email = $request->email;
+        $mobile = $request->mobile;
+        $username = $request->username;
+        $password = Hash::make($request->password);
+
+        $emailUser = User::where('email', $email)->first();
+        if ($emailUser) {
+            return response()->json(['message' => 'Email Address is already taken.'],400);
+        }
+
+        $userName = User::where('username', $username)->first();
+        if ($userName) {
+            return response()->json(['message' => 'Username is already taken.'],400);
+        }
+
+        User::create ([
+            'lastname' => $lastname,
+            'firstname' => $firstname,
+            'email' => $email,
+            'mobile' => $mobile,
+            'username' => $username,
+            'password' => $password,
+            'roles' => 'USER',
+            'isactivated' => 1,
+            'profilepic' => 'http://127.0.0.1:8000/images/pix.png',
+        ]);        
+
+        return response()->json([
+            'message' => 'User registered successfully.'],201);
+    }
+}
